@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "MeshViewer.hh"
+#include "Viewer\MeshViewer.hh"
 
 int main(int argc, char **argv)
 {

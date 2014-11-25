@@ -14,10 +14,10 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\Viewer">
-      <UniqueIdentifier>{b36c69c4-a5b7-443f-8ceb-14a43962d880}</UniqueIdentifier>
+      <UniqueIdentifier>{ced521c0-7fc9-40dd-8a12-e5f790e296de}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Viewer">
-      <UniqueIdentifier>{d09b1ecf-bbc2-40e7-8453-14d48abdde61}</UniqueIdentifier>
+      <UniqueIdentifier>{b3ab8386-99cc-40db-83df-f8c188c607db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,18 +27,21 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Viewer\ViewerData.h">
+    <ClInclude Include="Viewer\GlutViewer.hh">
       <Filter>Header Files\Viewer</Filter>
     </ClInclude>
     <ClInclude Include="Viewer\MeshViewer.hh">
       <Filter>Header Files\Viewer</Filter>
     </ClInclude>
-    <ClInclude Include="Viewer\GlutViewer.hh">
+    <ClInclude Include="Viewer\ViewerData.h">
       <Filter>Header Files\Viewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Viewer\GlutViewer.cc">
@@ -49,9 +52,6 @@
     </ClCompile>
     <ClCompile Include="Viewer\ViewerData.cpp">
       <Filter>Source Files\Viewer</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cc">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
