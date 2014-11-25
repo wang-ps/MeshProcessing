@@ -96,7 +96,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Viewer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,22 +140,22 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GlutViewer.hh" />
+    <ClInclude Include="MeshViewer.hh" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Viewer\GlutViewer.hh" />
-    <ClInclude Include="Viewer\MeshViewer.hh" />
-    <ClInclude Include="Viewer\ViewerData.h" />
+    <ClInclude Include="ViewerData.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GlutViewer.cc" />
     <ClCompile Include="main.cc" />
+    <ClCompile Include="MeshViewer.cc" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Viewer\GlutViewer.cc" />
-    <ClCompile Include="Viewer\MeshViewer.cc" />
-    <ClCompile Include="Viewer\ViewerData.cpp" />
+    <ClCompile Include="ViewerData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
