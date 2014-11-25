@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Viewer">
+      <UniqueIdentifier>{b36c69c4-a5b7-443f-8ceb-14a43962d880}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Viewer">
+      <UniqueIdentifier>{d09b1ecf-bbc2-40e7-8453-14d48abdde61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -21,30 +27,30 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GlutViewer.hh">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Viewer\ViewerData.h">
+      <Filter>Header Files\Viewer</Filter>
     </ClInclude>
-    <ClInclude Include="MeshViewer.hh">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Viewer\MeshViewer.hh">
+      <Filter>Header Files\Viewer</Filter>
     </ClInclude>
-    <ClInclude Include="ViewerData.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Viewer\GlutViewer.hh">
+      <Filter>Header Files\Viewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Viewer\GlutViewer.cc">
+      <Filter>Source Files\Viewer</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewer\MeshViewer.cc">
+      <Filter>Source Files\Viewer</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewer\ViewerData.cpp">
+      <Filter>Source Files\Viewer</Filter>
+    </ClCompile>
     <ClCompile Include="main.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GlutViewer.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshViewer.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ViewerData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
