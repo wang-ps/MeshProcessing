@@ -120,12 +120,11 @@ void GlutViewer::setup_view(void)
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
 
-
 	// material
 	GLfloat mat_a[] = { 0.2, 0.2, 0.2, 1.0 };
 	GLfloat mat_d[] = { 0.7, 0.6, 0.0, 1.0 };
 	GLfloat mat_s[] = { 0.3, 0.3, 0.3, 1.0 };
-	GLfloat shine[] = { 35.0 };
+	GLfloat shine[] = { 20.0 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_a);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_d);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_s);

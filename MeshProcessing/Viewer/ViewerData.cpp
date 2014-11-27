@@ -61,9 +61,9 @@ void ViewerData::set_mesh(const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F)
   F = _F;
   
   compute_normals();
-  uniform_colors(Eigen::Vector3d(51.0/255.0,43.0/255.0,33.3/255.0),
-                 Eigen::Vector3d(255.0/255.0,228.0/255.0,58.0/255.0),
-                 Eigen::Vector3d(255.0/255.0,235.0/255.0,80.0/255.0));
+  uniform_colors(Eigen::Vector3d(0.2, 0.2, 0.2),
+                 Eigen::Vector3d(0.6, 0.5, 0),
+                 Eigen::Vector3d(0.3, 0.3, 0.3));
 
   grid_texture();
 

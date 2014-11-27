@@ -13,6 +13,12 @@ public:
 	/// open mesh
 	void open_mesh(const char* _filename);
 
+	/// set mesh
+	void set_mesh(Eigen::MatrixXd &_V, Eigen::MatrixXi &_F);
+
+	/// set color
+	void set_color(Eigen::MatrixXd &C);
+
 	/// setup anttweakbar
 	void setup_anttweakbar(void);
 
@@ -24,7 +30,7 @@ private:
 	static void TW_CALL tw_save_file(void *_clientData);
 
 private:
-	GLuint draw_list_[2];
+	GLuint draw_list_;
 
 protected:
 	ViewerData  mesh_;
