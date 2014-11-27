@@ -1,6 +1,6 @@
 
 #pragma once
-#include "..\stdafx.h"
+#include "stdafx.h"
 
 typedef enum { HIDDEN_LINE = 1, WIRE_FRAME, SOLID_FLAT, SOLID_SMOOTH} DrawMode;
 
