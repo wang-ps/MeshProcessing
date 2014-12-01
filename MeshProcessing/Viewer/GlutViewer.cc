@@ -137,6 +137,16 @@ void GlutViewer::setup_view(void)
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, col);
+
+	// anti-alias
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void GlutViewer::setup_scene( const Vec3d& _cog, double _radius )
@@ -183,6 +193,7 @@ void GlutViewer::reshape(int _w, int _h)
 	width_  = _w; 
 	height_ = _h;
 	glViewport(0, 0, _w, _h);
+	glGetIntegerv(GL_VIEWPORT, viewport_);
 	apply_projection_matrix();
 
 	// for anttweak bar

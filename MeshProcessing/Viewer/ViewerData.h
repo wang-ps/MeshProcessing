@@ -1,29 +1,11 @@
 #pragma once
-#include <Eigen/Core>
-typedef Eigen::Matrix<double, -1, -1, Eigen::RowMajor> MaxtrixXdc;
-typedef Eigen::Matrix<int, -1, -1, Eigen::RowMajor> MaxtrixXic;
+#include "stdafx.h"
 
 class ViewerData
 {
 public:
 	ViewerData();
-
-	enum DirtyFlags
-	{
-		DIRTY_NONE = 0x0000,
-		DIRTY_POSITION = 0x0001,
-		DIRTY_UV = 0x0002,
-		DIRTY_NORMAL = 0x0004,
-		DIRTY_AMBIENT = 0x0008,
-		DIRTY_DIFFUSE = 0x0010,
-		DIRTY_SPECULAR = 0x0020,
-		DIRTY_TEXTURE = 0x0040,
-		DIRTY_FACE = 0x0080,
-		DIRTY_MESH = 0x00FF,
-		DIRTY_OVERLAY_LINES = 0x0100,
-		DIRTY_OVERLAY_POINTS = 0x0200,
-		DIRTY_ALL = 0x03FF
-	};
+	~ViewerData();
 
 	// Empty all fields
 	void clear();
@@ -53,14 +35,23 @@ public:
 	void compute_normals();
 
 	// Assigns uniform colors to all faces/vertices
-	void uniform_colors(Eigen::Vector3d ambient, Eigen::Vector3d diffuse, Eigen::Vector3d specular);
+	void uniform_colors(Vec3d ambient, Vec3d diffuse, Vec3d specular);
 
 	// Generates a default grid texture
 	void grid_texture();
 
+	// select point
+	void select_pt(Vec3d &pt);
+
+	void draw_mesh(int mode);
+	void draw_select_pts();
+
 public:
 	Eigen::MatrixXd V; // Vertices of the current mesh (#V x 3)
 	Eigen::MatrixXi  F; // Faces of the mesh (#F x 3)
+
+	Vec3d p_min, p_max;
+	double avg_edge;
 
 	// Per face attributes
 	Eigen::MatrixXd F_normals; // One normal per face
@@ -90,4 +81,12 @@ public:
 
 	// Enable per-face or per-vertex properties
 	bool face_based;
+
+	// selected points
+	std::vector<int> selected_pts;
+
+private:
+	void init_kdTree();
+	ANNpointArray ann_pts;
+	ANNkd_tree * ann_kdTree;
 };

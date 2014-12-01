@@ -64,8 +64,9 @@ protected:
 	double near_, far_, fovy_;
 
 	// OpenGL matrices
-	double projection_matrix_[16];
-	double modelview_matrix_[16];
+	GLdouble projection_matrix_[16];
+	GLdouble modelview_matrix_[16];
+	GLint viewport_[4];
 
 	// trackball helpers
 	Vec2i last_point_2D_;

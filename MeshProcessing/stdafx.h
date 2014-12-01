@@ -7,15 +7,28 @@
 
 #include <iostream>
 #include <string>
+
+// glut
 #include <gl/glut.h>
+
+// anttweakbar
 #include <AntTweakBar.h>
+
+// eigen
 #include <Eigen/dense>
+
+// ann
+#include <ANN/ANN.h>
+
+// libigl
 #include <igl/write_triangle_mesh.h>
 #include <igl/read_triangle_mesh.h>
 #include <igl/file_dialog_open.h>
 #include <igl/file_dialog_save.h>
 #include <igl/per_face_normals.h>
 #include <igl/per_vertex_normals.h>
+#include <igl/avg_edge_length.h>
+
 
 typedef Eigen::Vector3d Vec3d;
 typedef Eigen::Vector2i Vec2i;

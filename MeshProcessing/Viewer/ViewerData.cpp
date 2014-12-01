@@ -1,12 +1,16 @@
 #include "stdafx.h"
 #include "ViewerData.h"
 
-
-
 ViewerData::ViewerData()
 {
   clear();
 };
+
+ViewerData::~ViewerData()
+{
+	delete ann_kdTree;
+	annClose();
+}
 
 void ViewerData::clear()
 {
@@ -28,6 +32,8 @@ void ViewerData::clear()
   F_uv                    = Eigen::MatrixXi (0,3);
 
   face_based = false;
+
+  selected_pts.clear();
 }
 
 
@@ -36,7 +42,6 @@ void ViewerData::set_face_based(bool newvalue)
   if (face_based != newvalue)
   {
     face_based = newvalue;
-    dirty = DIRTY_ALL;
   }
 }
 
@@ -60,21 +65,26 @@ void ViewerData::set_mesh(const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F)
   // set the faces
   F = _F;
   
+  // calc bounding box
+  p_min = V.colwise().minCoeff();
+  p_max = V.colwise().maxCoeff();
+
+  // average edge lenght
+  avg_edge = igl::avg_edge_length(V, F);
   compute_normals();
-  uniform_colors(Eigen::Vector3d(0.2, 0.2, 0.2),
-                 Eigen::Vector3d(0.6, 0.5, 0),
-                 Eigen::Vector3d(0.3, 0.3, 0.3));
+  uniform_colors(Vec3d(0.2, 0.2, 0.2),
+                 Vec3d(0.6, 0.5, 0),
+                 Vec3d(0.3, 0.3, 0.3));
 
   grid_texture();
 
-  dirty |= DIRTY_FACE | DIRTY_POSITION;
+  init_kdTree();
 }
 
 void ViewerData::set_vertices(const Eigen::MatrixXd& _V)
 {
   V = _V;
   assert(F.size() == 0 || F.maxCoeff() < V.rows());
-  dirty |= DIRTY_POSITION;
 }
 
 void ViewerData::set_normals(const Eigen::MatrixXd& N)
@@ -91,7 +101,6 @@ void ViewerData::set_normals(const Eigen::MatrixXd& N)
   }
   else
     std::cerr << "ERROR (set_normals): Please provide a normal per face, per corner or per vertex.";
-  dirty |= DIRTY_NORMAL;
 }
 
 void ViewerData::set_colors(const Eigen::MatrixXd &C)
@@ -146,7 +155,6 @@ void ViewerData::set_colors(const Eigen::MatrixXd &C)
   }
   else
     std::cerr << "ERROR (set_colors): Please provide a single color, or a color per face or per vertex.";
-  dirty |= DIRTY_DIFFUSE;
 }
 
 void ViewerData::set_uv(const Eigen::MatrixXd& UV)
@@ -158,7 +166,6 @@ void ViewerData::set_uv(const Eigen::MatrixXd& UV)
   }
   else
     std::cerr << "ERROR (set_UV): Please provide uv per vertex.";
-  dirty |= DIRTY_UV;
 }
 
 void ViewerData::set_uv(const Eigen::MatrixXd& UV_V, const Eigen::MatrixXi& UV_F)
@@ -166,7 +173,6 @@ void ViewerData::set_uv(const Eigen::MatrixXd& UV_V, const Eigen::MatrixXi& UV_F
   set_face_based(true);
   V_uv = UV_V;
   F_uv = UV_F;
-  dirty |= DIRTY_UV;
 }
 
 void ViewerData::set_texture(
@@ -177,17 +183,15 @@ void ViewerData::set_texture(
   texture_R = R;
   texture_G = G;
   texture_B = B;
-  dirty |= DIRTY_TEXTURE;
 }
 
 void ViewerData::compute_normals()
 {
   igl::per_face_normals(V, F, F_normals);
   igl::per_vertex_normals(V, F, F_normals, V_normals);
-  dirty |= DIRTY_NORMAL;
 }
 
-void ViewerData::uniform_colors(Eigen::Vector3d ambient, Eigen::Vector3d diffuse, Eigen::Vector3d specular)
+void ViewerData::uniform_colors(Vec3d ambient, Vec3d diffuse, Vec3d specular)
 {
   V_material_ambient.resize(V.rows(),3);
   V_material_diffuse.resize(V.rows(),3);
@@ -208,7 +212,6 @@ void ViewerData::uniform_colors(Eigen::Vector3d ambient, Eigen::Vector3d diffuse
     F_material_diffuse.row(i) = diffuse;
     F_material_specular.row(i) = specular;
   }
-  dirty |= DIRTY_SPECULAR | DIRTY_DIFFUSE | DIRTY_AMBIENT;
 }
 
 void ViewerData::grid_texture()
@@ -221,7 +224,6 @@ void ViewerData::grid_texture()
     V_uv.col(1) = V_uv.col(1).array() - V_uv.col(1).minCoeff();
     V_uv.col(1) = V_uv.col(1).array() / V_uv.col(1).maxCoeff();
     V_uv = V_uv.array() * 10;
-    dirty |= DIRTY_TEXTURE;
   }
 
   unsigned size = 128;
@@ -239,5 +241,154 @@ void ViewerData::grid_texture()
 
   texture_G = texture_R;
   texture_B = texture_R;
-  dirty |= DIRTY_TEXTURE;
+}
+
+void ViewerData::init_kdTree()
+{
+	int n = V.rows();
+	ann_pts = annAllocPts(n, 3);
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			ann_pts[i][j] = V(i, j);
+		}
+	}
+
+	ann_kdTree = new ANNkd_tree(ann_pts, n, 3);
+}
+
+void ViewerData::select_pt(Vec3d &pt)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if (pt[i]<p_min[i] - avg_edge||
+			pt[i]> p_max[i] + avg_edge)
+			return;
+	}
+
+	ANNpoint queryPt = annAllocPt(3);
+	ANNidx* Idx = new ANNidx;
+	ANNdist* dist = new ANNdist;
+	queryPt[0] = pt[0]; queryPt[1] = pt[1]; queryPt[2] = pt[2];
+	ann_kdTree->annkSearch(queryPt, 1, Idx, dist);
+
+	if (*dist < 3 * avg_edge)
+	{
+		bool flag = false;
+		auto it = selected_pts.begin();
+		for (; it != selected_pts.end(); it++)
+		{
+			if (*it == *Idx)
+			{
+				flag = true;
+				break;
+			}
+		}
+
+		if (!flag)
+			selected_pts.push_back(*Idx);
+		else
+			selected_pts.erase(it);
+	}
+
+	delete Idx;
+	delete dist;
+}
+
+void ViewerData::draw_mesh(int mode)
+{
+	// color material && face-based && flat
+	if (mode == 0)
+	{
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_DIFFUSE);
+		glShadeModel(GL_FLAT);
+		glBegin(GL_TRIANGLES);
+		for (int i = 0; i < F.rows(); i++)
+		{
+			glNormal3d(F_normals(i, 0), F_normals(i, 1), F_normals(i, 2));
+			for (int j = 0; j < 3; j++)
+			{
+				int iv = F(i, j);
+				glColor3d(V_material_diffuse(iv, 0), V_material_diffuse(iv, 1), V_material_diffuse(iv, 2));
+				glVertex3d(V(iv, 0), V(iv, 1), V(iv, 2));
+			}
+		}
+		glEnd();
+		glDisable(GL_COLOR_MATERIAL);
+	}
+	
+	// color material && vertex-based && smooth
+	if (mode == 1)
+	{
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_DIFFUSE);
+		glShadeModel(GL_SMOOTH);
+		glBegin(GL_TRIANGLES);
+		for (int i = 0; i < F.rows(); i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				int iv = F(i, j);
+				glColor3d(V_material_diffuse(iv, 0), V_material_diffuse(iv, 1), V_material_diffuse(iv, 2));
+				glNormal3d(V_normals(iv, 0), V_normals(iv, 1), V_normals(iv, 2));
+				glVertex3d(V(iv, 0), V(iv, 1), V(iv, 2));
+			}
+		}
+		glEnd();
+		glDisable(GL_COLOR_MATERIAL);
+	}
+	
+	// face-based && flat
+	if (mode == 2)
+	{
+		glShadeModel(GL_FLAT);
+		glBegin(GL_TRIANGLES);
+		for (int i = 0; i < F.rows(); i++)
+		{
+			glNormal3d(F_normals(i, 0), F_normals(i, 1), F_normals(i, 2));
+			for (int j = 0; j < 3; j++)
+			{
+				int iv =F(i, j);
+				glVertex3d(V(iv, 0), V(iv, 1), V(iv, 2));
+			}
+		}
+		glEnd();
+	}
+}
+
+void ViewerData::draw_select_pts()
+{
+	int n = selected_pts.size();
+	if (n < 1)return;
+
+	double radius = (p_max - p_min).norm();
+	GLUquadricObj* obj = gluNewQuadric();
+	gluQuadricDrawStyle(obj, GLU_FILL);
+	gluQuadricNormals(obj, GLU_SMOOTH);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glColor3d(1.0, 0.0, 0.0);
+	for (int i = 0; i < n; i++)
+	{
+		Vec3d pt = V.row(selected_pts[i]);
+		glPushMatrix();
+		glTranslatef(pt[0], pt[1], pt[2]);
+		gluSphere(obj, 0.01*radius, 10, 10);
+		glPopMatrix();
+	}
+	glDisable(GL_COLOR_MATERIAL);
+
+// 	glDisable(GL_LIGHTING);
+// 	glColor3d(1.0, 0.0, 0.0);
+// 	glPointSize(0.02*avg_edge);
+// 	glBegin(GL_POINTS);
+// 	for (int i = 0; i < n; i++)
+// 	{
+// 		Vec3d pt = V.row(selected_pts[i]);
+// 		glVertex3d(pt[0], pt[1], pt[2]);
+// 	}
+// 	glEnd();
+// 	glEnable(GL_LIGHTING);
 }

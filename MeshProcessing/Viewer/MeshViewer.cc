@@ -3,7 +3,7 @@
 
 // -----------
 MeshViewer::MeshViewer(const char* _title, int _width, int _height)
-  :GlutViewer(_title, _width, _height)
+:GlutViewer(_title, _width, _height), select_flag(false)
 {
 }
 
@@ -81,6 +81,30 @@ void MeshViewer::draw()
 		glEnable(GL_LIGHTING);
 		glCallList(draw_list_+1);
 	}
+
+	mesh_.draw_select_pts();
+}
+
+void MeshViewer::mouse(int button, int state, int x, int y)
+{
+	GlutViewer::mouse(button, state, x, y);
+
+	// select point
+	if (glutGetModifiers() == GLUT_ACTIVE_CTRL && state == GLUT_DOWN)
+	{
+		GLdouble winX = double(x);
+		GLdouble winY = double(viewport_[3] - y);
+		GLfloat winZ = 0.0;
+		GLdouble pt[3];
+		glReadPixels((int)winX, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+		gluUnProject(winX, winY, (GLdouble)winZ, modelview_matrix_, projection_matrix_, viewport_, &pt[0], &pt[1], &pt[2]);
+
+		std::cout << winX << " " << winY << " " << winZ << std::endl;
+		std::cout << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
+
+		mesh_.select_pt(Vec3d(pt));
+	}
+
 }
 
 void MeshViewer::create_display_list()
@@ -89,60 +113,15 @@ void MeshViewer::create_display_list()
 	draw_list_ = glGenLists(3);
 
 	glNewList(draw_list_, GL_COMPILE);
-		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT, GL_DIFFUSE);
-		glShadeModel(GL_FLAT);
-		glBegin(GL_TRIANGLES);
-		for (int i = 0; i < mesh_.F.rows(); i++)
-		{
-			glNormal3d(mesh_.F_normals(i, 0), mesh_.F_normals(i, 1), mesh_.F_normals(i, 2));
-			for (int j = 0; j < 3; j++)
-			{
-				int iv = mesh_.F(i, j);
-				glColor3d(mesh_.V_material_diffuse(iv, 0),
-					mesh_.V_material_diffuse(iv, 1), 
-					mesh_.V_material_diffuse(iv, 2));
-				glVertex3d(mesh_.V(iv, 0), mesh_.V(iv, 1), mesh_.V(iv, 2));
-			}
-		}
-		glEnd();
-		glDisable(GL_COLOR_MATERIAL);
+	mesh_.draw_mesh(0);
 	glEndList();
 
 	glNewList(draw_list_+1, GL_COMPILE);
-		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT, GL_DIFFUSE);
-		glShadeModel(GL_SMOOTH);
-		glBegin(GL_TRIANGLES);
-		for (int i = 0; i < mesh_.F.rows(); i++)
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				int iv = mesh_.F(i, j);
-				glColor3d(mesh_.V_material_diffuse(iv, 0),
-					mesh_.V_material_diffuse(iv, 1),
-					mesh_.V_material_diffuse(iv, 2));
-				glNormal3d(mesh_.V_normals(iv, 0), mesh_.V_normals(iv, 1), mesh_.V_normals(iv, 2));
-				glVertex3d(mesh_.V(iv, 0), mesh_.V(iv, 1), mesh_.V(iv, 2));
-			}
-		}
-		glEnd();
-		glDisable(GL_COLOR_MATERIAL);
+	mesh_.draw_mesh(1);
 	glEndList();
 
 	glNewList(draw_list_+2, GL_COMPILE);
-		glShadeModel(GL_FLAT);
-		glBegin(GL_TRIANGLES);
-		for (int i = 0; i < mesh_.F.rows(); i++)
-		{
-			glNormal3d(mesh_.F_normals(i, 0), mesh_.F_normals(i, 1), mesh_.F_normals(i, 2));
-			for (int j = 0; j < 3; j++)
-			{
-				int iv = mesh_.F(i, j);
-				glVertex3d(mesh_.V(iv, 0), mesh_.V(iv, 1), mesh_.V(iv, 2));
-			}
-		}
-		glEnd();
+	mesh_.draw_mesh(2);
 	glEndList();
 }
 
@@ -151,6 +130,8 @@ void MeshViewer::setup_anttweakbar()
 	GlutViewer::setup_anttweakbar();
 	TwAddButton(bar_, "Open File", tw_open_file, this, "group = 'File'");
 	TwAddButton(bar_, "Save File", tw_save_file, this, "group = 'File'");
+	
+	TwAddButton(bar_, "Clear Selection", tw_clear_select, this, "group = 'Select' ");
 }
 
 void MeshViewer::tw_open_file(void *_clientData)
@@ -171,4 +152,10 @@ void MeshViewer::tw_save_file(void *_clientData)
 		MeshViewer* viewer = (MeshViewer*)_clientData;
 		igl::write_triangle_mesh(filename, viewer->mesh_.V, viewer->mesh_.F);
 	}
+}
+
+void MeshViewer::tw_clear_select(void *_clientData)
+{
+	MeshViewer* viewer = (MeshViewer*)_clientData;
+	viewer->mesh_.selected_pts.clear();
 }

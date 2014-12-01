@@ -19,21 +19,28 @@ public:
 	/// set color
 	void set_color(Eigen::MatrixXd &C);
 
+protected:
 	/// setup anttweakbar
-	void setup_anttweakbar(void);
+	virtual void setup_anttweakbar(void);
+
+	/// mouse
+	virtual void mouse(int button, int state, int x, int y);
 
 	/// draw the scene
 	virtual void draw();
+
 private:
 	void create_display_list();
 	static void TW_CALL tw_open_file(void *_clientData);
 	static void TW_CALL tw_save_file(void *_clientData);
+	static void TW_CALL tw_clear_select(void *_clientData);
 
 private:
 	GLuint draw_list_;
 
 protected:
 	ViewerData  mesh_;
+	bool select_flag;
 };
 
 #endif 
