@@ -369,7 +369,7 @@ void ViewerData::draw_select_pts()
 	gluQuadricNormals(obj, GLU_SMOOTH);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-	glColor3d(1.0, 0.0, 0.0);
+	glColor3d(0.8, 0.0, 0.0);
 	for (int i = 0; i < n; i++)
 	{
 		Vec3d pt = V.row(selected_pts[i]);

@@ -60,7 +60,7 @@ void MeshViewer::draw()
 		glEnable(GL_LIGHTING);
 		glPolygonOffset(1, 1);
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		glCallList(draw_list_+2);
+		glCallList(draw_list_);
 		glDisable(GL_POLYGON_OFFSET_FILL);		
 
 		glDisable(GL_LIGHTING);
