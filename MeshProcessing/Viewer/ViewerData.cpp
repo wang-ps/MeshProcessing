@@ -363,7 +363,8 @@ void ViewerData::draw_select_pts()
 	int n = selected_pts.size();
 	if (n < 1)return;
 
-	double radius = (p_max - p_min).norm();
+	double radius = Min((p_max - p_min).norm()*0.01, avg_edge/3);
+
 	GLUquadricObj* obj = gluNewQuadric();
 	gluQuadricDrawStyle(obj, GLU_FILL);
 	gluQuadricNormals(obj, GLU_SMOOTH);
@@ -375,7 +376,7 @@ void ViewerData::draw_select_pts()
 		Vec3d pt = V.row(selected_pts[i]);
 		glPushMatrix();
 		glTranslatef(pt[0], pt[1], pt[2]);
-		gluSphere(obj, 0.01*radius, 10, 10);
+		gluSphere(obj, radius, 10, 10);
 		glPopMatrix();
 	}
 	glDisable(GL_COLOR_MATERIAL);

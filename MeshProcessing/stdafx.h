@@ -32,3 +32,15 @@
 
 typedef Eigen::Vector3d Vec3d;
 typedef Eigen::Vector2i Vec2i;
+
+template <typename T>
+T Min(T a, T b)
+{
+	return a > b ? b : a;
+}
+
+template <typename T>
+T Max(T a, T b)
+{
+	return a > b ? a : b;
+}
