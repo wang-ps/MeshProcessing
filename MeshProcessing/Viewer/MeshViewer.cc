@@ -82,6 +82,7 @@ void MeshViewer::draw()
 		glCallList(draw_list_+1);
 	}
 
+	glEnable(GL_LIGHTING);
 	mesh_.draw_select_pts();
 }
 

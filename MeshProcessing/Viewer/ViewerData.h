@@ -89,4 +89,5 @@ private:
 	void init_kdTree();
 	ANNpointArray ann_pts;
 	ANNkd_tree * ann_kdTree;
+	GLUquadricObj* obj;
 };
