@@ -1,21 +1,21 @@
 #include "stdafx.h"
 #include "ViewerData.h"
 
-ViewerData::ViewerData()
+MeshData::MeshData()
 {
   clear();
   obj = gluNewQuadric();
 
 };
 
-ViewerData::~ViewerData()
+MeshData::~MeshData()
 {
 	delete ann_kdTree;
 	gluDeleteQuadric(obj);
 	annClose();
 }
 
-void ViewerData::clear()
+void MeshData::clear()
 {
   V                       = Eigen::MatrixXd (0,3);
   F                       = Eigen::MatrixXi (0,3);
@@ -40,7 +40,7 @@ void ViewerData::clear()
 }
 
 
-void ViewerData::set_face_based(bool newvalue)
+void MeshData::set_face_based(bool newvalue)
 {
   if (face_based != newvalue)
   {
@@ -49,7 +49,7 @@ void ViewerData::set_face_based(bool newvalue)
 }
 
 // Helpers that draws the most common meshes
-void ViewerData::set_mesh(const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F)
+void MeshData::set_mesh(const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F)
 {
   // empty the mesh
   clear(); 
@@ -84,13 +84,13 @@ void ViewerData::set_mesh(const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F)
   init_kdTree();
 }
 
-void ViewerData::set_vertices(const Eigen::MatrixXd& _V)
+void MeshData::set_vertices(const Eigen::MatrixXd& _V)
 {
   V = _V;
   assert(F.size() == 0 || F.maxCoeff() < V.rows());
 }
 
-void ViewerData::set_normals(const Eigen::MatrixXd& N)
+void MeshData::set_normals(const Eigen::MatrixXd& N)
 {
   if (N.rows() == V.rows())
   {
@@ -106,7 +106,7 @@ void ViewerData::set_normals(const Eigen::MatrixXd& N)
     std::cerr << "ERROR (set_normals): Please provide a normal per face, per corner or per vertex.";
 }
 
-void ViewerData::set_colors(const Eigen::MatrixXd &C)
+void MeshData::set_colors(const Eigen::MatrixXd &C)
 {
   using namespace Eigen;
   
@@ -160,7 +160,7 @@ void ViewerData::set_colors(const Eigen::MatrixXd &C)
     std::cerr << "ERROR (set_colors): Please provide a single color, or a color per face or per vertex.";
 }
 
-void ViewerData::set_uv(const Eigen::MatrixXd& UV)
+void MeshData::set_uv(const Eigen::MatrixXd& UV)
 {
   if (UV.rows() == V.rows())
   {
@@ -171,14 +171,14 @@ void ViewerData::set_uv(const Eigen::MatrixXd& UV)
     std::cerr << "ERROR (set_UV): Please provide uv per vertex.";
 }
 
-void ViewerData::set_uv(const Eigen::MatrixXd& UV_V, const Eigen::MatrixXi& UV_F)
+void MeshData::set_uv(const Eigen::MatrixXd& UV_V, const Eigen::MatrixXi& UV_F)
 {
   set_face_based(true);
   V_uv = UV_V;
   F_uv = UV_F;
 }
 
-void ViewerData::set_texture(
+void MeshData::set_texture(
   const Eigen::Matrix<char,Eigen::Dynamic,Eigen::Dynamic>& R,
   const Eigen::Matrix<char,Eigen::Dynamic,Eigen::Dynamic>& G,
   const Eigen::Matrix<char,Eigen::Dynamic,Eigen::Dynamic>& B)
@@ -188,13 +188,13 @@ void ViewerData::set_texture(
   texture_B = B;
 }
 
-void ViewerData::compute_normals()
+void MeshData::compute_normals()
 {
   igl::per_face_normals(V, F, F_normals);
   igl::per_vertex_normals(V, F, F_normals, V_normals);
 }
 
-void ViewerData::uniform_colors(Vec3d ambient, Vec3d diffuse, Vec3d specular)
+void MeshData::uniform_colors(Vec3d ambient, Vec3d diffuse, Vec3d specular)
 {
   V_material_ambient.resize(V.rows(),3);
   V_material_diffuse.resize(V.rows(),3);
@@ -217,7 +217,7 @@ void ViewerData::uniform_colors(Vec3d ambient, Vec3d diffuse, Vec3d specular)
   }
 }
 
-void ViewerData::grid_texture()
+void MeshData::grid_texture()
 {
   if (V_uv.rows() == 0)
   {
@@ -246,7 +246,7 @@ void ViewerData::grid_texture()
   texture_B = texture_R;
 }
 
-void ViewerData::init_kdTree()
+void MeshData::init_kdTree()
 {
 	int n = V.rows();
 	ann_pts = annAllocPts(n, 3);
@@ -261,7 +261,7 @@ void ViewerData::init_kdTree()
 	ann_kdTree = new ANNkd_tree(ann_pts, n, 3);
 }
 
-void ViewerData::select_pt(Vec3d &pt)
+void MeshData::select_pt(Vec3d &pt)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -278,18 +278,8 @@ void ViewerData::select_pt(Vec3d &pt)
 
 	if (*dist < 3 * avg_edge)
 	{
-		bool flag = false;
-		auto it = selected_pts.begin();
-		for (; it != selected_pts.end(); it++)
-		{
-			if (*it == *Idx)
-			{
-				flag = true;
-				break;
-			}
-		}
-
-		if (!flag)
+		auto it = find(selected_pts.begin(), selected_pts.end(), *Idx);
+		if (it == selected_pts.end() || selected_pts.empty())
 			selected_pts.push_back(*Idx);
 		else
 			selected_pts.erase(it);
@@ -299,7 +289,7 @@ void ViewerData::select_pt(Vec3d &pt)
 	delete dist;
 }
 
-void ViewerData::draw_mesh(int mode)
+void MeshData::draw_mesh(int mode)
 {
 	// color material && face-based && flat
 	if (mode == 0)
@@ -361,7 +351,7 @@ void ViewerData::draw_mesh(int mode)
 	}
 }
 
-void ViewerData::draw_select_pts()
+void MeshData::draw_select_pts()
 {
 	int n = selected_pts.size();
 	if (n < 1)return;

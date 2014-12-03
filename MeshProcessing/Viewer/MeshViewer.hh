@@ -39,7 +39,7 @@ private:
 	GLuint draw_list_;
 
 protected:
-	ViewerData  mesh_;
+	MeshData  mesh_;
 	bool select_flag;
 };
 

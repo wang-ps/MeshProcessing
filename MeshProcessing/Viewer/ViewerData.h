@@ -1,11 +1,11 @@
 #pragma once
 #include "stdafx.h"
 
-class ViewerData
+class MeshData
 {
 public:
-	ViewerData();
-	~ViewerData();
+	MeshData();
+	~MeshData();
 
 	// Empty all fields
 	void clear();
