@@ -88,7 +88,6 @@ void MeshViewer::draw()
 
 void MeshViewer::mouse(int button, int state, int x, int y)
 {
-	GlutViewer::mouse(button, state, x, y);
 
 	// select point
 	if (glutGetModifiers() == GLUT_ACTIVE_CTRL && state == GLUT_DOWN)
@@ -104,6 +103,9 @@ void MeshViewer::mouse(int button, int state, int x, int y)
 		std::cout << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
 
 		mesh_.select_pt(Vec3d(pt));
+	}
+	else{
+		GlutViewer::mouse(button, state, x, y);
 	}
 
 }
