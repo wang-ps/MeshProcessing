@@ -99,8 +99,8 @@ void MeshViewer::mouse(int button, int state, int x, int y)
 		glReadPixels((int)winX, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
 		gluUnProject(winX, winY, (GLdouble)winZ, modelview_matrix_, projection_matrix_, viewport_, &pt[0], &pt[1], &pt[2]);
 
-		std::cout << winX << " " << winY << " " << winZ << std::endl;
-		std::cout << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
+		//std::cout << winX << " " << winY << " " << winZ << std::endl;
+		//std::cout << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
 
 		mesh_.select_pt(Vec3d(pt));
 	}

@@ -280,9 +280,13 @@ void MeshData::select_pt(Vec3d &pt)
 	{
 		auto it = find(selected_pts.begin(), selected_pts.end(), *Idx);
 		if (it == selected_pts.end() || selected_pts.empty())
+		{
 			selected_pts.push_back(*Idx);
+			std::cout << "Vertex Index: " << *Idx << std::endl;
+		}
 		else
 			selected_pts.erase(it);
+
 	}
 
 	delete Idx;
