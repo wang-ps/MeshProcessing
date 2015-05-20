@@ -332,7 +332,7 @@ void MeshData::select_face(Vec3d &pt)
 		if (it == selected_faces.end() || selected_faces.empty())
 		{
 			selected_faces.push_back(*Idx);
-			std::cout << "Face Index : " << *Idx << std::endl;
+			std::cout << "Face : " << *Idx << std::endl;
 		}
 		else
 			selected_faces.erase(it);
