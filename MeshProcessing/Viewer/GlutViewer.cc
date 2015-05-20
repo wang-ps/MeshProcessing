@@ -466,6 +466,6 @@ void GlutViewer::visibility__(int visible) {
 
 void GlutViewer::terminate__()
 {
-	TwTerminate();
+	//TwTerminate();
 
 }

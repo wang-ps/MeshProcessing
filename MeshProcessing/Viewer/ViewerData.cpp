@@ -10,9 +10,10 @@ MeshData::MeshData()
 
 MeshData::~MeshData()
 {
-	delete ann_kdTree;
-	gluDeleteQuadric(obj);
+	delete ann_kdTree_pt;
+	delete ann_kdTree_faces;
 	annClose();
+	gluDeleteQuadric(obj);
 }
 
 void MeshData::clear()
@@ -37,6 +38,7 @@ void MeshData::clear()
   face_based = false;
 
   selected_pts.clear();
+  selected_faces.clear();
 }
 
 
@@ -248,6 +250,7 @@ void MeshData::grid_texture()
 
 void MeshData::init_kdTree()
 {
+	// init vtx kdtree
 	int n = V.rows();
 	ann_pts = annAllocPts(n, 3);
 	for (int i = 0; i < n; i++)
@@ -258,7 +261,28 @@ void MeshData::init_kdTree()
 		}
 	}
 
-	ann_kdTree = new ANNkd_tree(ann_pts, n, 3);
+	ann_kdTree_pt = new ANNkd_tree(ann_pts, n, 3);
+
+	// init face kdtree
+	n = F.rows();
+	ann_faces = annAllocPts(n, 3);
+	for (int i = 0; i < n; i++)
+	{
+		Eigen::MatrixXd center(1, 3);
+		center.setZero();
+		for (int j = 0; j < 3; j++)
+		{
+			center += V.row(F(i, j));
+		}
+		center /= 3.0;
+
+		for (int j = 0; j < 3; j++)
+		{
+			ann_faces[i][j] = center(0, j);
+		}
+	}
+
+	ann_kdTree_faces = new ANNkd_tree(ann_faces, n, 3);
 }
 
 void MeshData::select_pt(Vec3d &pt)
@@ -274,7 +298,7 @@ void MeshData::select_pt(Vec3d &pt)
 	ANNidx* Idx = new ANNidx;
 	ANNdist* dist = new ANNdist;
 	queryPt[0] = pt[0]; queryPt[1] = pt[1]; queryPt[2] = pt[2];
-	ann_kdTree->annkSearch(queryPt, 1, Idx, dist);
+	ann_kdTree_pt->annkSearch(queryPt, 1, Idx, dist);
 
 	if (*dist < 3 * avg_edge)
 	{
@@ -282,7 +306,8 @@ void MeshData::select_pt(Vec3d &pt)
 		if (it == selected_pts.end() || selected_pts.empty())
 		{
 			selected_pts.push_back(*Idx);
-			std::cout << "Vertex Index: " << *Idx << std::endl;
+			std::cout << "Vertex : " << *Idx << std::endl;
+			//std::cout << "Vertex Positon :" << V.row(*Idx) << std::endl;
 		}
 		else
 			selected_pts.erase(it);
@@ -292,6 +317,32 @@ void MeshData::select_pt(Vec3d &pt)
 	delete Idx;
 	delete dist;
 }
+
+void MeshData::select_face(Vec3d &pt)
+{
+	ANNpoint queryPt = annAllocPt(3);
+	ANNidx* Idx = new ANNidx;
+	ANNdist* dist = new ANNdist;
+	queryPt[0] = pt[0]; queryPt[1] = pt[1]; queryPt[2] = pt[2];
+	ann_kdTree_faces->annkSearch(queryPt, 1, Idx, dist);
+
+	if (*dist < 3 * avg_edge)
+	{
+		auto it = find(selected_faces.begin(), selected_faces.end(), *Idx);
+		if (it == selected_faces.end() || selected_faces.empty())
+		{
+			selected_faces.push_back(*Idx);
+			std::cout << "Face Index : " << *Idx << std::endl;
+		}
+		else
+			selected_faces.erase(it);
+
+	}
+
+	delete Idx;
+	delete dist;
+}
+
 
 void MeshData::draw_mesh(int mode)
 {
@@ -388,4 +439,24 @@ void MeshData::draw_select_pts()
 // 	}
 // 	glEnd();
 // 	glEnable(GL_LIGHTING);
+}
+
+void MeshData::draw_select_faces()
+{
+	int n = selected_faces.size();
+	if (n < 1)return;
+	
+	glDisable(GL_LIGHTING);
+	glBegin(GL_TRIANGLES);
+	glColor4d(0.7, 0.0, 0.0, 0.7);
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			Vec3d pt = V.row(F(selected_faces[i], j));
+			glVertex3d(pt[0], pt[1], pt[2]);
+		}
+	}
+	glEnd();
+	glEnable(GL_LIGHTING);
 }

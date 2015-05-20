@@ -73,24 +73,30 @@ void MeshViewer::draw()
     if (draw_mode_ == SOLID_FLAT)
 	{
 		glEnable(GL_LIGHTING);
+		glDepthRange(0.01, 1.0);
 		glCallList(draw_list_);		
 	}
 
 	if (draw_mode_ == SOLID_SMOOTH)
 	{
 		glEnable(GL_LIGHTING);
+		glDepthRange(0.01, 1.0);
 		glCallList(draw_list_+1);
 	}
 
 	glEnable(GL_LIGHTING);
 	mesh_.draw_select_pts();
+	//glPolygonOffset(1, 1);
+	glDepthRange(0.0, 1.0);
+	mesh_.draw_select_faces();
 }
 
 void MeshViewer::mouse(int button, int state, int x, int y)
 {
 
 	// select point
-	if (glutGetModifiers() == GLUT_ACTIVE_CTRL && state == GLUT_DOWN)
+	int modifier = glutGetModifiers();
+	if (( modifier == GLUT_ACTIVE_CTRL ||modifier == GLUT_ACTIVE_ALT) && state == GLUT_DOWN)
 	{
 		GLdouble winX = double(x);
 		GLdouble winY = double(viewport_[3] - y);
@@ -102,7 +108,10 @@ void MeshViewer::mouse(int button, int state, int x, int y)
 		//std::cout << winX << " " << winY << " " << winZ << std::endl;
 		//std::cout << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
 
-		mesh_.select_pt(Vec3d(pt));
+		if (modifier == GLUT_ACTIVE_CTRL)
+			mesh_.select_pt(Vec3d(pt));
+		else
+			mesh_.select_face(Vec3d(pt));
 	}
 	else{
 		GlutViewer::mouse(button, state, x, y);
@@ -161,4 +170,5 @@ void MeshViewer::tw_clear_select(void *_clientData)
 {
 	MeshViewer* viewer = (MeshViewer*)_clientData;
 	viewer->mesh_.selected_pts.clear();
+	viewer->mesh_.selected_faces.clear();
 }

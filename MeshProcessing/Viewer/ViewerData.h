@@ -43,8 +43,12 @@ public:
 	// select point
 	void select_pt(Vec3d &pt);
 
+	// select face
+	void select_face(Vec3d &pt);
+
 	void draw_mesh(int mode);
 	void draw_select_pts();
+	void draw_select_faces();
 
 public:
 	Eigen::MatrixXd V; // Vertices of the current mesh (#V x 3)
@@ -85,9 +89,16 @@ public:
 	// selected points
 	std::vector<int> selected_pts;
 
+	// selected faces
+	std::vector<int> selected_faces;
+
 private:
 	void init_kdTree();
 	ANNpointArray ann_pts;
-	ANNkd_tree * ann_kdTree;
+	ANNkd_tree * ann_kdTree_pt;
+
+	ANNpointArray ann_faces;
+	ANNkd_tree * ann_kdTree_faces;
+
 	GLUquadricObj* obj;
 };
