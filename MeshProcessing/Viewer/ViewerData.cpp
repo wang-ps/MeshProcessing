@@ -265,6 +265,7 @@ void MeshData::init_kdTree()
 
 	// init face kdtree
 	n = F.rows();
+	F_center.resize(n, 3);
 	ann_faces = annAllocPts(n, 3);
 	for (int i = 0; i < n; i++)
 	{
@@ -275,6 +276,7 @@ void MeshData::init_kdTree()
 			center += V.row(F(i, j));
 		}
 		center /= 3.0;
+		F_center.row(i) = center;
 
 		for (int j = 0; j < 3; j++)
 		{
@@ -306,8 +308,8 @@ void MeshData::select_pt(Vec3d &pt)
 		if (it == selected_pts.end() || selected_pts.empty())
 		{
 			selected_pts.push_back(*Idx);
-			std::cout << "Vertex : " << *Idx << std::endl;
-			//std::cout << "Vertex Positon :" << V.row(*Idx) << std::endl;
+			std::cout << "Vertex : " << *Idx // << std::endl;
+				<< "\t" << V(*Idx, 0) << "\t" << V(*Idx, 1) << "\t" << V(*Idx, 2) << std::endl;
 		}
 		else
 			selected_pts.erase(it);
@@ -332,7 +334,8 @@ void MeshData::select_face(Vec3d &pt)
 		if (it == selected_faces.end() || selected_faces.empty())
 		{
 			selected_faces.push_back(*Idx);
-			std::cout << "Face : " << *Idx << std::endl;
+			std::cout << "Face : " << *Idx //<< std::endl;
+				<< "\t" << F_center(*Idx, 0) << "\t" << F_center(*Idx, 1) << "\t" << F_center(*Idx, 2) << std::endl;
 		}
 		else
 			selected_faces.erase(it);

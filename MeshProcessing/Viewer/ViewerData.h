@@ -59,6 +59,7 @@ public:
 
 	// Per face attributes
 	Eigen::MatrixXd F_normals; // One normal per face
+	Eigen::MatrixXd F_center;
 
 	Eigen::MatrixXd F_material_ambient; // Per face ambient color
 	Eigen::MatrixXd F_material_diffuse; // Per face diffuse color
